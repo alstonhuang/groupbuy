@@ -7,7 +7,7 @@
   <script>
     const products = [
       { name: "大腸頭", price: 210 },
-      { name: "肉團", price: 160 },
+      { name: "肉圓", price: 160 },
       { name: "南部粽", price: 160 },
       { name: "東石鮮蚵", price: 220 },
       { name: "死神辣椒", price: 300 },
@@ -20,30 +20,6 @@
         total += qty * p.price;
       });
       document.getElementById("total").innerText = `總金額: ${total} 元`;
-    }
-
-    async function submitOrder() {
-      const name = document.getElementById("name").value.trim();
-      if (!name) return alert("請輸入姓名");
-      const order = products.map((p, i) => {
-        return {
-          name: p.name,
-          qty: parseInt(document.getElementById(`qty-${i}`).value) || 0
-        };
-      });
-      const data = {
-        name,
-        order
-      };
-      // 送出給 Google Apps Script Web App URL (PLACEHOLDER)
-      const url = "https://script.google.com/macros/s/AKfycbw4izvX2C-QoW0qSkldWJ5ZVgKtDLWnXI1Y-jOSqzUb3GmBoBAGcF5r3UcPIoD8dtWj_Q/exec";
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-      if (res.ok) alert("✅ 訂單已送出成功");
-      else alert("錯誤，請重試");
     }
   </script>
   <style>
@@ -73,22 +49,34 @@
 </head>
 <body>
   <h2>社區團購訂單</h2>
-  <label>姓名 / 戶號: <input id="name" placeholder="如: B1-23 阿明" /></label>
-  <div id="form">
+  <form id="orderForm" action="https://script.google.com/macros/s/AKfycbw4izvX2C-QoW0qSkldWJ5ZVgKtDLWnXI1Y-jOSqzUb3GmBoBAGcF5r3UcPIoD8dtWj_Q/exec" method="POST" target="submitFrame" onsubmit="return confirm('確定送出訂單？');">
+    <label>姓名 / 戶號: <input name="name" placeholder="如: B1-23 阿明" required /></label>
     <hr />
-    <div id="products">
-      <!-- JS 模糊產生內容 -->
-      <script>
-        document.write(products.map((p, i) => `
-          <div class="product">
-            <label>${p.name} (${p.price}元)</label>
-            <input id="qty-${i}" type="number" min="0" value="0" onchange="updateTotal()" />
-          </div>`).join(""));
-      </script>
+    <div class="product">
+      <label>大腸頭 (210元)</label>
+      <input name="大腸頭" id="qty-0" type="number" min="0" value="0" onchange="updateTotal()" />
+    </div>
+    <div class="product">
+      <label>肉圓 (160元)</label>
+      <input name="肉圓" id="qty-1" type="number" min="0" value="0" onchange="updateTotal()" />
+    </div>
+    <div class="product">
+      <label>南部粽 (160元)</label>
+      <input name="南部粽" id="qty-2" type="number" min="0" value="0" onchange="updateTotal()" />
+    </div>
+    <div class="product">
+      <label>東石鮮蚵 (220元)</label>
+      <input name="東石鮮蚵" id="qty-3" type="number" min="0" value="0" onchange="updateTotal()" />
+    </div>
+    <div class="product">
+      <label>死神辣椒 (300元)</label>
+      <input name="死神辣椒" id="qty-4" type="number" min="0" value="0" onchange="updateTotal()" />
     </div>
     <hr />
     <div id="total">總金額: 0 元</div>
-    <button onclick="submitOrder()">送出訂單</button>
-  </div>
+    <button type="submit">送出訂單</button>
+  </form>
+
+  <iframe name="submitFrame" style="display:none;"></iframe>
 </body>
 </html>
