@@ -21,6 +21,12 @@
       });
       document.getElementById("total").innerText = `總金額: ${total} 元`;
     }
+
+    function showSuccessMessage() {
+      document.getElementById("success").style.display = "block";
+      document.getElementById("orderForm").reset();
+      updateTotal();
+    }
   </script>
   <style>
     body {
@@ -45,11 +51,17 @@
       color: white;
       border-radius: 5px;
     }
+    #success {
+      display: none;
+      margin-top: 1rem;
+      color: green;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <h2>社區團購訂單</h2>
-  <form id="orderForm" action="https://script.google.com/macros/s/AKfycbzT6V0h0FHeeJvV5XqORgr0u6td9FJDyF2cWhBdubc-wsEMli3v96fVSnjf7sEhQ7whEQ/exec" method="POST" target="submitFrame" onsubmit="return confirm('確定送出訂單？');">
+  <form id="orderForm" action="https://script.google.com/macros/s/AKfycbw4izvX2C-QoW0qSkldWJ5ZVgKtDLWnXI1Y-jOSqzUb3GmBoBAGcF5r3UcPIoD8dtWj_Q/exec" method="POST" target="submitFrame" onsubmit="return confirm('確定送出訂單？');">
     <label>姓名 / 戶號: <input name="name" placeholder="如: B1-23 阿明" required /></label>
     <hr />
     <div class="product">
@@ -61,11 +73,11 @@
       <input name="肉圓" id="qty-1" type="number" min="0" value="0" onchange="updateTotal()" />
     </div>
     <div class="product">
-      <label>南部粽 (160元)</label>
+      <label>南部簳 (160元)</label>
       <input name="南部粽" id="qty-2" type="number" min="0" value="0" onchange="updateTotal()" />
     </div>
     <div class="product">
-      <label>東石鮮蚵 (220元)</label>
+      <label>東石鮮蟷 (220元)</label>
       <input name="東石鮮蚵" id="qty-3" type="number" min="0" value="0" onchange="updateTotal()" />
     </div>
     <div class="product">
@@ -77,6 +89,10 @@
     <button type="submit">送出訂單</button>
   </form>
 
-  <iframe name="submitFrame" style="display:none;"></iframe>
+  <iframe name="submitFrame" style="display:none;" onload="showSuccessMessage()"></iframe>
+
+  <div id="success">
+    ✅ 訂單已送出，感謝您的下單！
+  </div>
 </body>
 </html>
