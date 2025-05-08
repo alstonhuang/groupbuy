@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>社區團購訂單</title>
+  <script>
+    const products = [
+      { name: "大腸頭", price: 210 },
+      { name: "肉團", price: 160 },
+      { name: "南部簳", price: 160 },
+      { name: "東石鮮蟷", price: 220 },
+      { name: "死神辣椒", price: 300 },
+    ];
+
+    function updateTotal() {
+      let total = 0;
+      products.forEach((p, i) => {
+        const qty = parseInt(document.getElementById(`qty-${i}`).value) || 0;
+        total += qty * p.price;
+      });
+      document.getElementById("total").innerText = `總金額: ${total} 元`;
+    }
+
+    async function submitOrder() {
+      const name = document.getElementById("name").value.trim();
+      if (!name) return alert("請輸入姓名");
+      const order = products.map((p, i) => {
+        return {
+          name: p.name,
+          qty: parseInt(document.getElementById(`qty-${i}`).value) || 0
+        };
+      });
+      const data = {
+        name,
+        order
+      };
+      // 送出給 Google Apps Script Web App URL (PLACEHOLDER)
+      const url = "YOUR_GAS_ENDPOINT_HERE";
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) alert("✅ 訂單已送出成功");
+      else alert("錯誤，請重試");
+    }
+  </script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1rem;
+      background: #f9f9f9;
+    }
+    .product {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .product input {
+      width: 60px;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border: none;
+      background: #06c;
+      color: white;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>社區團購訂單</h2>
+  <label>姓名 / 戶號: <input id="name" placeholder="如: B1-23 阿明" /></label>
+  <div id="form">
+    <hr />
+    <div id="products">
+      <!-- JS 模糊產生內容 -->
+      <script>
+        document.write(products.map((p, i) => `
+          <div class="product">
+            <label>${p.name} (${p.price}元)</label>
+            <input id="qty-${i}" type="number" min="0" value="0" onchange="updateTotal()" />
+          </div>`).join(""));
+      </script>
+    </div>
+    <hr />
+    <div id="total">總金額: 0 元</div>
+    <button onclick="submitOrder()">送出訂單</button>
+  </div>
+</body>
+</html>
