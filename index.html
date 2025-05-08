@@ -8,8 +8,8 @@
     const products = [
       { name: "大腸頭", price: 210 },
       { name: "肉團", price: 160 },
-      { name: "南部簳", price: 160 },
-      { name: "東石鮮蟷", price: 220 },
+      { name: "南部粽", price: 160 },
+      { name: "東石鮮蚵", price: 220 },
       { name: "死神辣椒", price: 300 },
     ];
 
@@ -36,7 +36,7 @@
         order
       };
       // 送出給 Google Apps Script Web App URL (PLACEHOLDER)
-      const url = "YOUR_GAS_ENDPOINT_HERE";
+      const url = "https://script.google.com/macros/s/AKfycbw4izvX2C-QoW0qSkldWJ5ZVgKtDLWnXI1Y-jOSqzUb3GmBoBAGcF5r3UcPIoD8dtWj_Q/exec";
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
