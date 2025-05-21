@@ -11,6 +11,7 @@
     input, select, button, textarea { width: 100%; margin: 0.5em 0; padding: 0.75em; border: 1px solid #ccc; border-radius: 4px; }
     button { background: #06c755; color: white; border: none; font-weight: bold; cursor: pointer; }
     button:hover { background: #059144; }
+    #unit-group { display: none; }
   </style>
 </head>
 <body>
@@ -22,8 +23,10 @@
       <label>姓名（自動帶入）</label>
       <input type="text" id="name" name="name" readonly />
 
-      <label>戶號（可自填或對照）</label>
-      <input type="text" id="unit" name="unit" placeholder="例：B1-7" />
+      <div id="unit-group">
+        <label>戶號（首次需填）</label>
+        <input type="text" id="unit" name="unit" placeholder="例：B1-7" />
+      </div>
 
       <label>品項</label>
       <select name="product">
@@ -45,11 +48,28 @@
   </div>
 
   <script>
+    let userId = '';
+
     async function initLIFF() {
-      await liff.init({ liffId: "YOUR_LIFF_ID" });
+      await liff.init({ liffId: "2007453248-Zvw56Yx0" });
       if (!liff.isLoggedIn()) liff.login();
       const profile = await liff.getProfile();
       document.getElementById('name').value = profile.displayName;
+
+      // 儲存 LINE userId
+      const context = await liff.getContext();
+      userId = context.userId || liff.getIDToken();
+
+      // 查對照表
+      const res = await fetch(`https://sunlake.app.n8n.cloud/webhook/lookup-or-bind-user?userId=${userId}`, {
+        method: 'GET'
+      });
+      const result = await res.json();
+      if (result.found) {
+        document.getElementById('unit').value = result.unit;
+      } else {
+        document.getElementById('unit-group').style.display = 'block';
+      }
     }
 
     initLIFF();
@@ -58,12 +78,23 @@
       e.preventDefault();
       const form = e.target;
       const data = Object.fromEntries(new FormData(form).entries());
-      const res = await fetch('https://sunlake.app.n8n.cloud/webhook/open-group', {
+      data.userId = userId;
+
+      // 若使用者首次綁定戶號 → 寫入對照表
+      if (document.getElementById('unit-group').style.display === 'block') {
+        await fetch('https://sunlake.app.n8n.cloud/webhook/lookup-or-bind-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, name: data.name, unit: data.unit })
+        });
+      }
+
+      // 寫入訂單（與原 webhook）
+      await fetch('https://sunlake.app.n8n.cloud/webhook/open-group', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      const result = await res.text();
       document.getElementById('response-msg').innerText = '✅ 登記成功！';
       form.reset();
     });
