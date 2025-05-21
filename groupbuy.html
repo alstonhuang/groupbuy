@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LINE 登入後自動填表</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #f9f9f9; }
+    .container { max-width: 500px; margin: auto; background: white; padding: 2em; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    input, select, button, textarea { width: 100%; margin: 0.5em 0; padding: 0.75em; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: #06c755; color: white; border: none; font-weight: bold; cursor: pointer; }
+    button:hover { background: #059144; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📦 團購登記表單</h2>
+    <p>以下資料將根據您的 LINE 身分自動填入。</p>
+
+    <form id="order-form">
+      <label>姓名（自動帶入）</label>
+      <input type="text" id="name" name="name" readonly />
+
+      <label>戶號（可自填或對照）</label>
+      <input type="text" id="unit" name="unit" placeholder="例：B1-7" />
+
+      <label>品項</label>
+      <select name="product">
+        <option value="鹹糕">鹹糕</option>
+        <option value="水餃">水餃</option>
+        <option value="麻糬">麻糬</option>
+      </select>
+
+      <label>數量</label>
+      <input type="number" name="quantity" min="1" max="10" required />
+
+      <label>備註</label>
+      <textarea name="note" placeholder="如口味、分裝等..."></textarea>
+
+      <button type="submit">✅ 送出登記</button>
+    </form>
+
+    <p id="response-msg"></p>
+  </div>
+
+  <script>
+    async function initLIFF() {
+      await liff.init({ liffId: "YOUR_LIFF_ID" });
+      if (!liff.isLoggedIn()) liff.login();
+      const profile = await liff.getProfile();
+      document.getElementById('name').value = profile.displayName;
+    }
+
+    initLIFF();
+
+    document.getElementById('order-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = Object.fromEntries(new FormData(form).entries());
+      const res = await fetch('https://sunlake.app.n8n.cloud/webhook/open-group', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.text();
+      document.getElementById('response-msg').innerText = '✅ 登記成功！';
+      form.reset();
+    });
+  </script>
+</body>
+</html>
