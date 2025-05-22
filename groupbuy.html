@@ -55,12 +55,16 @@
       if (!liff.isLoggedIn()) liff.login();
 
       const profile = await liff.getProfile();
-      const idTokenSub = liff.getDecodedIDToken().sub;
+      const decoded = liff.getDecodedIDToken();
+      if (decoded && decoded.sub) {
+        userId = decoded.sub;
+      } else {
+        userId = liff.getIDToken(); // fallback
+      }
 
       document.getElementById('name').value = profile.displayName;
-      userId = idTokenSub;
 
-      // 改為 POST 查詢綁定資料以避免 CORS 問題
+      // POST 查詢綁定資料以避免 CORS 問題
       const res = await fetch("https://sunlake.app.n8n.cloud/webhook-test/lookup-or-bind-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
