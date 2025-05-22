@@ -53,15 +53,20 @@
     async function initLIFF() {
       await liff.init({ liffId: "2007453248-Zvw56Yx0" });
       if (!liff.isLoggedIn()) liff.login();
+
       const profile = await liff.getProfile();
-      const idToken = liff.getIDToken();
+      const idTokenSub = liff.getDecodedIDToken().sub;
 
       document.getElementById('name').value = profile.displayName;
-      userId = idToken; // 使用 IDToken 作為識別碼
+      userId = idTokenSub;
 
-      const res = await fetch(`https://sunlake.app.n8n.cloud/webhook-test/lookup-or-bind-user?userId=${encodeURIComponent(userId)}`, {
-        method: 'GET'
+      // 改為 POST 查詢綁定資料以避免 CORS 問題
+      const res = await fetch("https://sunlake.app.n8n.cloud/webhook-test/lookup-or-bind-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, queryOnly: true })
       });
+
       const result = await res.json();
       if (result.found) {
         document.getElementById('unit').value = result.unit;
