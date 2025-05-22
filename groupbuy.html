@@ -54,14 +54,12 @@
       await liff.init({ liffId: "2007453248-Zvw56Yx0" });
       if (!liff.isLoggedIn()) liff.login();
       const profile = await liff.getProfile();
+      const idToken = liff.getIDToken();
+
       document.getElementById('name').value = profile.displayName;
+      userId = idToken; // 將 IDToken 作為唯一識別用
 
-      // 儲存 LINE userId
-      const context = await liff.getContext();
-      userId = context.userId || liff.getIDToken();
-
-      // 查對照表
-      const res = await fetch(`https://sunlake.app.n8n.cloud/webhook/lookup-or-bind-user?userId=${userId}`, {
+      const res = await fetch(`https://sunlake.app.n8n.cloud/webhook/lookup-or-bind-user?userId=${encodeURIComponent(userId)}`, {
         method: 'GET'
       });
       const result = await res.json();
@@ -80,7 +78,6 @@
       const data = Object.fromEntries(new FormData(form).entries());
       data.userId = userId;
 
-      // 若使用者首次綁定戶號 → 寫入對照表
       if (document.getElementById('unit-group').style.display === 'block') {
         await fetch('https://sunlake.app.n8n.cloud/webhook/lookup-or-bind-user', {
           method: 'POST',
@@ -89,7 +86,6 @@
         });
       }
 
-      // 寫入訂單（與原 webhook）
       await fetch('https://sunlake.app.n8n.cloud/webhook/open-group', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
